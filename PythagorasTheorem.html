@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pythagorean Theorem Practice</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      color: blue;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .question {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .answer-box {
+      display: flex;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .answer-box label {
+      font-size: 18px;
+      color: blue;
+      margin-right: 10px;
+    }
+
+    .answer-box input {
+      padding: 5px;
+      font-size: 16px;
+    }
+
+    .answer-box button {
+      padding: 5px 10px;
+      font-size: 16px;
+      background-color: blue;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .answer-result {
+      margin-top: 10px;
+    }
+
+    .answer-result span {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .correct-answer {
+      color: green;
+    }
+
+    .incorrect-answer {
+      color: red;
+    }
+    
+    #canvas {
+      display: block;
+      margin: 20px auto;
+      border: 2px solid blue; /* Set the border width and color */
+    }
+  </style>
+</head>
+<body>
+  <h1>Pythagorean Theorem Practice</h1>
+  <canvas id="canvas" width="600" height="400"></canvas>
+  <div class="question" id="question"></div>
+  <div class="answer-box">
+    <label>Enter your answer:</label>
+    <input type="number" step="0.1" id="user-answer">
+    <button onclick="checkAnswer()">Check</button>
+    <div style="width: 10px;"></div> <!-- Space between the buttons -->
+    <button id="next-question" onclick="generateNextQuestion()">Next question</button>
+  </div>
+  <div id="answer-result"></div>
+
+  <script>
+    let a, b, c;
+    let missingSideCase;
+
+    // Generate random numbers for a, b, and missing side
+    function generateRandomNumbers() {
+      missingSideCase = Math.floor(Math.random() * 3); // 0: a, 1: b, 2: c
+
+      switch (missingSideCase) {
+        case 0: // Missing side a
+          do {
+            b = parseFloat((Math.random() * 12 + 2).toFixed(1));
+            c = parseFloat((Math.random() * 18 + 14).toFixed(1));
+            a = Math.sqrt(c ** 2 - b ** 2);
+          } while (Math.abs(a - b) > 7);
+          break;
+        case 1: // Missing side b
+          do {
+            a = parseFloat((Math.random() * 12 + 2).toFixed(1));
+            c = parseFloat((Math.random() * 18 + 14).toFixed(1));
+            b = Math.sqrt(c ** 2 - a ** 2);
+          } while (Math.abs(a - b) > 7);
+          break;
+        case 2: // Missing hypotenuse (c)
+          do {
+            a = parseFloat((Math.random() * 18 + 2).toFixed(1));
+            b = parseFloat((Math.random() * 18 + 2).toFixed(1));
+            c = parseFloat((Math.random() * 18 + 2).toFixed(1));
+          } while (Math.abs(a - b) > 7);
+          break;
+      }
+    }
+
+    // Generate Pythagorean theorem question
+    function generatePythagoreanQuestion() {
+      let question, answer;
+
+      switch (missingSideCase) {
+        case 0: // Missing side a
+          question = `Find the length of the missing side (2.dp) in the triangle where side b = ${b.toFixed(1)} and the hypotenuse = ${c.toFixed(1)}.`;
+          answer = a.toFixed(2);
+          break;
+        case 1: // Missing side b
+          question = `Find the length of the missing side (2.dp) in the triangle where side a = ${a.toFixed(1)} and the hypotenuse = ${c.toFixed(1)}.`;
+          answer = b.toFixed(2);
+          break;
+        case 2: // Missing hypotenuse (c)
+          question = `Find the length of the missing side (2.dp) in the triangle where side a = ${a.toFixed(1)} and side b = ${b.toFixed(1)}.`;
+          answer = c.toFixed(1);
+          break;
+      }
+
+      return {
+        question,
+        answer,
+      };
+    }
+
+    // Check the user's answer
+    function checkAnswer() {
+      const userAnswer = parseFloat(document.getElementById('user-answer').value);
+      const answerObj = generatePythagoreanQuestion();
+      const correctAnswer = parseFloat(answerObj.answer);
+      const answerResultElement = document.getElementById('answer-result');
+      const nextQuestionButton = document.getElementById('next-question');
+
+      if (userAnswer === correctAnswer) {
+        answerResultElement.innerHTML = `<span class="correct-answer">Correct!</span>`;
+        nextQuestionButton.style.backgroundColor = 'green';
+      } else {
+        answerResultElement.innerHTML = `<span class="incorrect-answer">Incorrect! The correct answer is ${correctAnswer}.`;
+        nextQuestionButton.style.backgroundColor = 'red';
+      }
+    }
+
+    // Generate next question
+    function generateNextQuestion() {
+      generateRandomNumbers();
+      const questionObj = generatePythagoreanQuestion();
+      const questionElement = document.getElementById('question');
+      const answerResultElement = document.getElementById('answer-result');
+      const userAnswerInput = document.getElementById('user-answer');
+      const nextQuestionButton = document.getElementById('next-question');
+
+      questionElement.textContent = questionObj.question;
+      answerResultElement.innerHTML = '';
+      userAnswerInput.value = '';
+      nextQuestionButton.style.backgroundColor = 'blue';
+
+      drawTriangle();
+    }
+
+    // Draw the right triangle
+    function drawTriangle() {
+      const canvas = document.getElementById('canvas');
+      const context = canvas.getContext('2d');
+      
+      const x = 50; // Starting x-coordinate of the triangle
+      const y = canvas.height - 50; // Starting y-coordinate of the triangle
+      const sideA = a * 18; // Length of side A
+      const sideB = b * 18; // Length of side B
+      
+      // Clear the canvas
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw the triangle
+      context.beginPath();
+      context.moveTo(x, y);
+      context.lineTo(x, y - sideA);
+      context.lineTo(x + sideB, y);
+      context.closePath();
+      context.stroke();
+      
+      // Draw hypotenuse 
+      const hypotenuse = c * 18; // Length of hypotenuse
+      context.beginPath();
+      context.moveTo(x, y - sideA);
+      context.lineTo(x + sideB, y);
+      context.stroke();
+      
+      // Label sides based on the missing side case
+      context.font = "16px Arial"; // Set the font size for labels
+      switch (missingSideCase) {
+        case 0: // Missing side a
+          context.fillText(b.toFixed(1), x + sideB / 2, y + 25);
+          context.fillText(c.toFixed(1), x + sideB / 2, y - sideA / 2 - 5);
+          break;
+        case 1: // Missing side b
+          context.fillText(a.toFixed(1), x - 35, y - sideA / 2);
+          context.fillText(c.toFixed(1), x + sideB / 2, y - sideA / 2 - 5);
+          break;
+        case 2: // Missing hypotenuse (c)
+          context.fillText(b.toFixed(1), x + sideB / 2, y + 25);
+          context.fillText(a.toFixed(1), x - 35, y - sideA / 2);
+          break;
+      }
+      
+      // Draw right angle box
+      const boxSize = 10;
+      context.fillRect(x, y - boxSize, boxSize, boxSize); 
+    }
+
+    // Automatically execute the function when the page loads
+    window.addEventListener('load', function() {
+      generateRandomNumbers();
+      const questionObj = generatePythagoreanQuestion();
+      const questionElement = document.getElementById('question');
+      questionElement.textContent = questionObj.question;
+      
+      drawTriangle();
+    });
+  </script>
+</body>
+</html>
